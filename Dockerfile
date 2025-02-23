@@ -30,11 +30,11 @@ COPY --from=builder /app/package.json /app/package.json
 COPY --from=builder /app/package-lock.json /app/package-lock.json
 
 # Set environment variables
-ENV MYSQL_HOST=127.0.0.1
-ENV MYSQL_PORT=3306
-ENV MYSQL_USER=root
-ENV MYSQL_PASS=
-ENV MYSQL_DB=db_name
+ENV MARIADB_HOST=127.0.0.1
+ENV MARIADB_PORT=3306
+ENV MARIADB_USER=root
+ENV MARIADB_PASS=
+ENV MARIADB_DB=db_name
 
 # Install production dependencies only
 RUN npm ci --omit=dev
