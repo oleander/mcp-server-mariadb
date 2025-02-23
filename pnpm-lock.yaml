@@ -11,11 +11,11 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: 1.0.1
         version: 1.0.1
-      mysql:
+      mariadb:
         specifier: ^2.18.1
         version: 2.18.1
     devDependencies:
-      '@types/mysql':
+      '@types/mariadb':
         specifier: ^2.15.26
         version: 2.15.26
       '@types/node':
@@ -33,7 +33,7 @@ packages:
   '@modelcontextprotocol/sdk@1.0.1':
     resolution: {integrity: sha512-slLdFaxQJ9AlRg+hw28iiTtGvShAOgOKXcD0F91nUcRYiOMuS9ZBYjcdNZRXW9G5JQ511GRTdUy1zQVZDpJ+4w==}
 
-  '@types/mysql@2.15.26':
+  '@types/mariadb@2.15.26':
     resolution: {integrity: sha512-DSLCOXhkvfS5WNNPbfn2KdICAmk8lLc+/PNvnPnF7gOdMZCxopXduqv0OQ13y/yA/zXTSikZZqVgybUxOEg6YQ==}
 
   '@types/node@20.17.9':
@@ -111,10 +111,6 @@ packages:
 
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
-
-  mysql@2.18.1:
-    resolution: {integrity: sha512-Bca+gk2YWmqp2Uf6k5NFEurwY/0td0cpebAucFpY/3jhrwrVGuxU2uQFCHjU19SJfje0yQvi+rVWdq78hR5lig==}
-    engines: {node: '>= 0.6'}
 
   once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
@@ -211,7 +207,7 @@ snapshots:
       raw-body: 3.0.0
       zod: 3.23.8
 
-  '@types/mysql@2.15.26':
+  '@types/mariadb@2.15.26':
     dependencies:
       '@types/node': 20.17.9
 
@@ -287,13 +283,6 @@ snapshots:
       brace-expansion: 1.1.11
 
   minimist@1.2.8: {}
-
-  mysql@2.18.1:
-    dependencies:
-      bignumber.js: 9.0.0
-      readable-stream: 2.3.7
-      safe-buffer: 5.1.2
-      sqlstring: 2.3.1
 
   once@1.4.0:
     dependencies:
