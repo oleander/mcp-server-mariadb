@@ -16,6 +16,7 @@
     "assets"
   ],
   "scripts": {
+    "prepare": "npm run build",
     "build": "tsc && shx chmod +x dist/*.js",
     "watch": "tsc --watch"
   },

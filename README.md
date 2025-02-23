@@ -51,6 +51,15 @@ To use this server with the Claude Desktop app, add the following configuration 
 Replace `/db_name` with your database name or leave it blank to retrieve all databases.
 
 ## Troubleshooting
+
+### Package Installation
+During package installation, the package will automatically compile the TypeScript code to JavaScript. This happens through the `prepare` script which runs `npm run build`. If you encounter any compilation errors during installation, ensure you have sufficient permissions and that your environment meets the following requirements:
+
+- Node.js installed and accessible in your PATH
+- Sufficient permissions to execute npm scripts
+- Access to write to the installation directory
+
+### Connection Issues
 If you encounter an error "Could not connect to MCP server mcp-server-mariadb", you may need to explicitly
 set the path of all required binaries such as the configuration below:
 
@@ -68,8 +77,8 @@ set the path of all required binaries such as the configuration below:
         "MARIADB_PORT": "3306",
         "MARIADB_USER": "root",
         "MARIADB_PASS": "",
-        "MARIADB_DB": "db_name"
-        "PATH": "/path/to/node/bin:/usr/bin:/bin" <-- Add this
+        "MARIADB_DB": "db_name",
+        "PATH": "/path/to/node/bin:/usr/bin:/bin"
       }
 
     }
