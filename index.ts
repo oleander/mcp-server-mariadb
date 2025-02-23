@@ -8,9 +8,7 @@ import {
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import mysql, { MysqlError, PoolConnection } from "mysql";
-
-type MySQLErrorType = MysqlError | null;
+import mariadb, { PoolConnection } from "mariadb";
 
 interface TableRow {
   table_name: string;
@@ -23,15 +21,15 @@ interface ColumnRow {
 
 const config = {
   server: {
-    name: "example-servers/mysql",
+    name: "example-servers/mariadb",
     version: "0.1.0",
   },
-  mysql: {
-    host: process.env.MYSQL_HOST || "127.0.0.1",
-    port: Number(process.env.MYSQL_PORT || "3306"),
-    user: process.env.MYSQL_USER || "root",
-    password: process.env.MYSQL_PASS || "",
-    database: process.env.MYSQL_DB || "",
+  mariadb: {
+    host: process.env.MARIADB_HOST || "127.0.0.1",
+    port: Number(process.env.MARIADB_PORT || "3306"),
+    user: process.env.MARIADB_USER || "root",
+    password: process.env.MARIADB_PASS || "",
+    database: process.env.MARIADB_DB || "",
     connectionLimit: 10,
   },
   paths: {
@@ -39,51 +37,49 @@ const config = {
   },
 };
 
-const mysqlQuery = <T>(
+const mariadbQuery = <T>(
   connection: PoolConnection,
   sql: string,
   params: any[] = [],
 ): Promise<T> => {
   return new Promise((resolve, reject) => {
-    connection.query(sql, params, (error: MySQLErrorType, results: any) => {
+    connection.query(sql, params, (error, results) => {
       if (error) reject(error);
       else resolve(results);
     });
   });
 };
 
-const mysqlGetConnection = (pool: mysql.Pool): Promise<PoolConnection> => {
+const mariadbGetConnection = (pool: mariadb.Pool): Promise<PoolConnection> => {
   return new Promise(
     (
       resolve: (value: PoolConnection | PromiseLike<PoolConnection>) => void,
       reject,
     ) => {
-      pool.getConnection(
-        (error: MySQLErrorType, connection: PoolConnection) => {
-          if (error) reject(error);
-          else resolve(connection);
-        },
-      );
+      pool.getConnection()
+        .then(connection => resolve(connection))
+        .catch(error => reject(error));
     },
   );
 };
 
-const mysqlBeginTransaction = (connection: PoolConnection): Promise<void> => {
+const mariadbBeginTransaction = (connection: PoolConnection): Promise<void> => {
   return new Promise((resolve, reject) => {
-    connection.beginTransaction((error: MySQLErrorType) => {
-      if (error) reject(error);
-      else resolve();
-    });
+    connection.beginTransaction()
+      .then(() => resolve())
+      .catch(error => reject(error));
   });
 };
 
-const mysqlRollback = (connection: PoolConnection): Promise<void> => {
+const mariadbRollback = (connection: PoolConnection): Promise<void> => {
   return new Promise((resolve, _) => {
-    connection.rollback(() => resolve());
+    connection.rollback()
+      .then(() => resolve())
+      .catch(() => resolve());
   });
 };
 
-const pool = mysql.createPool(config.mysql);
+const pool = mariadb.createPool(config.mariadb);
 const server = new Server(config.server, {
   capabilities: {
     resources: {},
@@ -92,9 +88,9 @@ const server = new Server(config.server, {
 });
 
 async function executeQuery<T>(sql: string, params: any[] = []): Promise<T> {
-  const connection = await mysqlGetConnection(pool);
+  const connection = await mariadbGetConnection(pool);
   try {
-    const results = await mysqlQuery<T>(connection, sql, params);
+    const results = await mariadbQuery<T>(connection, sql, params);
     return results;
   } finally {
     connection.release();
@@ -102,23 +98,23 @@ async function executeQuery<T>(sql: string, params: any[] = []): Promise<T> {
 }
 
 async function executeReadOnlyQuery<T>(sql: string): Promise<T> {
-  const connection = await mysqlGetConnection(pool);
+  const connection = await mariadbGetConnection(pool);
 
   try {
     // Set read-only mode
-    await mysqlQuery(connection, "SET SESSION TRANSACTION READ ONLY");
+    await mariadbQuery(connection, "SET SESSION TRANSACTION READ ONLY");
 
     // Begin transaction
-    await mysqlBeginTransaction(connection);
+    await mariadbBeginTransaction(connection);
 
     // Execute query
-    const results = await mysqlQuery(connection, sql);
+    const results = await mariadbQuery(connection, sql);
 
     // Rollback transaction (since it's read-only)
-    await mysqlRollback(connection);
+    await mariadbRollback(connection);
 
     // Reset to read-write mode
-    await mysqlQuery(connection, "SET SESSION TRANSACTION READ WRITE");
+    await mariadbQuery(connection, "SET SESSION TRANSACTION READ WRITE");
 
     return <T>{
       content: [
@@ -130,7 +126,7 @@ async function executeReadOnlyQuery<T>(sql: string): Promise<T> {
       isError: false,
     };
   } catch (error) {
-    await mysqlRollback(connection);
+    await mariadbRollback(connection);
     throw error;
   } finally {
     connection.release();
@@ -147,7 +143,7 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
     resources: results.map((row: TableRow) => ({
       uri: new URL(
         `${row.table_name}/${config.paths.schema}`,
-        `${config.mysql.host}:${config.mysql.port}`,
+        `${config.mariadb.host}:${config.mariadb.port}`,
       ).href,
       mimeType: "application/json",
       name: `"${row.table_name}" database schema`,
@@ -184,8 +180,8 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
-      name: "mysql_query",
-      description: "Run a read-only MySQL query",
+      name: "mariadb_query",
+      description: "Run a read-only MariaDB query",
       inputSchema: {
         type: "object",
         properties: {
@@ -197,7 +193,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 }));
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  if (request.params.name !== "mysql_query") {
+  if (request.params.name !== "mariadb_query") {
     throw new Error(`Unknown tool: ${request.params.name}`);
   }
 
@@ -214,14 +210,12 @@ async function runServer() {
 const shutdown = async (signal: string) => {
   console.log(`Received ${signal}. Shutting down...`);
   return new Promise<void>((resolve, reject) => {
-    pool.end((err: MySQLErrorType) => {
-      if (err) {
+    pool.end()
+      .then(() => resolve())
+      .catch(err => {
         console.error("Error closing pool:", err);
         reject(err);
-      } else {
-        resolve();
-      }
-    });
+      });
   });
 };
 
