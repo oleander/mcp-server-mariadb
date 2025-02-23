@@ -8,7 +8,8 @@ import {
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import mariadb, { PoolConnection } from "mariadb";
+import * as mariadb from 'mariadb';
+import { Pool, PoolConnection } from 'mariadb';
 
 interface TableRow {
   table_name: string;
@@ -43,31 +44,25 @@ const mariadbQuery = <T>(
   params: any[] = [],
 ): Promise<T> => {
   return new Promise((resolve, reject) => {
-    connection.query(sql, params, (error, results) => {
-      if (error) reject(error);
-      else resolve(results);
-    });
+    connection.query(sql, params)
+      .then((results: T) => resolve(results))
+      .catch((error: Error) => reject(error));
   });
 };
 
-const mariadbGetConnection = (pool: mariadb.Pool): Promise<PoolConnection> => {
-  return new Promise(
-    (
-      resolve: (value: PoolConnection | PromiseLike<PoolConnection>) => void,
-      reject,
-    ) => {
-      pool.getConnection()
-        .then(connection => resolve(connection))
-        .catch(error => reject(error));
-    },
-  );
+const mariadbGetConnection = (pool: Pool): Promise<PoolConnection> => {
+  return new Promise((resolve, reject) => {
+    pool.getConnection()
+      .then((connection: PoolConnection) => resolve(connection))
+      .catch((error: Error) => reject(error));
+  });
 };
 
 const mariadbBeginTransaction = (connection: PoolConnection): Promise<void> => {
   return new Promise((resolve, reject) => {
     connection.beginTransaction()
       .then(() => resolve())
-      .catch(error => reject(error));
+      .catch((error: Error) => reject(error));
   });
 };
 
@@ -212,7 +207,7 @@ const shutdown = async (signal: string) => {
   return new Promise<void>((resolve, reject) => {
     pool.end()
       .then(() => resolve())
-      .catch(err => {
+      .catch((err: Error) => {
         console.error("Error closing pool:", err);
         reject(err);
       });

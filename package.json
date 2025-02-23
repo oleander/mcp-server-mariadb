@@ -17,12 +17,11 @@
   ],
   "scripts": {
     "build": "tsc && shx chmod +x dist/*.js",
-    "prepare": "npm run build",
     "watch": "tsc --watch"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.0.1",
-    "mariadb": "*"
+    "mariadb": "^3.2.3"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
