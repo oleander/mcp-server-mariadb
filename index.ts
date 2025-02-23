@@ -108,11 +108,19 @@ async function executeReadOnlyQuery<T>(sql: string): Promise<T> {
     // Rollback transaction (since it's read-only)
     await mariadbRollback(connection);
 
+    // Custom JSON serializer to handle BigInt
+    const bigIntSerializer = (key: string, value: any) => {
+      if (typeof value === 'bigint') {
+        return value.toString();
+      }
+      return value;
+    };
+
     return <T>{
       content: [
         {
           type: "text",
-          text: JSON.stringify(results, null, 2),
+          text: JSON.stringify(results, bigIntSerializer, 2),
         },
       ],
       isError: false,
