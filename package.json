@@ -1,14 +1,14 @@
 {
-  "name": "@benborla29/mcp-server-mysql",
+  "name": "@oleander/mcp-server-mariadb",
   "version": "1.0.7",
-  "description": "MCP server for interacting with MySQL databases based on Node",
+  "description": "MCP server for interacting with MariaDB databases based on Node",
   "license": "MIT",
   "author": "Ben Borla (https://github.com/benborla)",
   "type": "module",
   "main": "dist/index.js",
   "preferGlobal": true,
   "bin": {
-    "mcp-server-mysql": "dist/index.js"
+    "mcp-server-mariadb": "dist/index.js"
   },
   "files": [
     "dist",
@@ -17,16 +17,14 @@
   ],
   "scripts": {
     "build": "tsc && shx chmod +x dist/*.js",
-    "prepare": "npm run build",
     "watch": "tsc --watch"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.0.1",
-    "mysql": "^2.18.1"
+    "mariadb": "^3.2.3"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
-    "@types/mysql": "^2.15.26",
     "shx": "^0.3.4",
     "typescript": "^5.6.2"
   },
