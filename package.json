@@ -1,5 +1,5 @@
 {
-  "name": "@benborla29/mcp-server-mariadb",
+  "name": "@oleander/mcp-server-mariadb",
   "version": "1.0.7",
   "description": "MCP server for interacting with MariaDB databases based on Node",
   "license": "MIT",

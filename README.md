@@ -1,5 +1,5 @@
 # MCP Server for MariaDB based on NodeJS
-[![smithery badge](https://smithery.ai/badge/@benborla29/mcp-server-mariadb)](https://smithery.ai/server/@benborla29/mcp-server-mariadb)
+[![smithery badge](https://smithery.ai/badge/@oleander/mcp-server-mariadb)](https://smithery.ai/server/@oleander/mcp-server-mariadb)
 ![Demo](assets/demo.gif)
 
 A Model Context Protocol server that provides read-only access to MariaDB databases. This server enables LLMs to inspect database schemas and execute read-only queries.
@@ -33,7 +33,7 @@ To use this server with the Claude Desktop app, add the following configuration 
       "command": "npx",
       "args": [
         "-y",
-        "@benborla29/mcp-server-mariadb",
+        "@oleander/mcp-server-mariadb",
       ],
       "env": {
         "MARIADB_HOST": "127.0.0.1",
@@ -61,7 +61,7 @@ set the path of all required binaries such as the configuration below:
       "command": "/path/to/npx/binary/npx",
       "args": [
         "-y",
-        "@benborla29/mcp-server-mariadb",
+        "@oleander/mcp-server-mariadb",
       ],
       "env": {
         "MARIADB_HOST": "127.0.0.1",

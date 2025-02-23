@@ -108,9 +108,6 @@ async function executeReadOnlyQuery<T>(sql: string): Promise<T> {
     // Rollback transaction (since it's read-only)
     await mariadbRollback(connection);
 
-    // Reset to read-write mode
-    await mariadbQuery(connection, "SET SESSION TRANSACTION READ WRITE");
-
     return <T>{
       content: [
         {
@@ -124,6 +121,12 @@ async function executeReadOnlyQuery<T>(sql: string): Promise<T> {
     await mariadbRollback(connection);
     throw error;
   } finally {
+    try {
+      // Always reset to read-write mode before releasing the connection
+      await mariadbQuery(connection, "SET SESSION TRANSACTION READ WRITE");
+    } catch (resetError) {
+      console.error("Error resetting transaction mode:", resetError);
+    }
     connection.release();
   }
 }
