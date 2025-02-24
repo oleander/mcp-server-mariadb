@@ -300,5 +300,6 @@ circuitBreaker.on('halfOpen', () => logger.info('Circuit breaker half-open'));
 circuitBreaker.on('close', () => logger.info('Circuit breaker closed'));
 
 async function executeWithCircuitBreaker<T>(sql: string, params: any[] = []): Promise<T> {
-  return circuitBreaker.fire(sql, params);
+  const result = await circuitBreaker.fire(sql, params);
+  return result as T;
 }
