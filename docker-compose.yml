@@ -17,7 +17,9 @@ services:
 
   mcp-server:
     container_name: mcp-server
-    image: node:23
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       MARIADB_HOST: mariadb
       MARIADB_PORT: 3306
