@@ -16,8 +16,8 @@
     "assets"
   ],
   "scripts": {
-    "prepare": "yarn run tsc && npm run build",
-    "build": "yarn run shx chmod +x dist/*.js"
+    "prepare": "npx -y tsc && npm run build",
+    "build": "npx -y shx chmod +x dist/*.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.0.1",
