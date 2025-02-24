@@ -1,4 +1,5 @@
 {
+  "image": "node:23",
   "tasks": {
     "build": "docker-compose build --no-cache",
     "test": "docker-compose up --wait-timeout 60 --exit-code-from tester",
