@@ -303,3 +303,37 @@ async function executeWithCircuitBreaker<T>(sql: string, params: any[] = []): Pr
   const result = await circuitBreaker.fire(sql, params);
   return result as T;
 }
+
+// Add logic to handle exit codes and restart the server accordingly
+process.on('exit', (code) => {
+  if (code === 0) {
+    logger.info('Server exited with code 0. Restarting immediately...');
+    runServer().catch((error: unknown) => {
+      logger.error("Server error:", error);
+      process.exit(1);
+    });
+  } else {
+    logger.warn(`Server exited with code ${code}. Restarting after a grace period...`);
+    setTimeout(() => {
+      runServer().catch((error: unknown) => {
+        logger.error("Server error:", error);
+        process.exit(1);
+      });
+    }, 10000); // 10 seconds grace period
+  }
+});
+
+// Add logic to check database health and restart server if database goes down
+async function checkDatabaseHealth() {
+  try {
+    const connection = await mariadbGetConnection(pool);
+    await connection.ping();
+    connection.release();
+    logger.info('Database is healthy');
+  } catch (error) {
+    logger.error('Database health check failed. Restarting server...');
+    process.exit(1);
+  }
+}
+
+setInterval(checkDatabaseHealth, 30000); // Check database health every 30 seconds

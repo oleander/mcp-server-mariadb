@@ -14,6 +14,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    restart: always
 
   mcp-server:
     container_name: mcp-server
@@ -39,6 +40,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    restart: on-failure
+    restart_policy:
+      condition: on-failure
+      delay: 10s
 
   tester:
     image: node:23

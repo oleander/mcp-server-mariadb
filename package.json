@@ -1,6 +1,6 @@
 {
   "name": "@oleander/mcp-server-mariadb",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "MCP server for interacting with MariaDB databases based on Node",
   "license": "MIT",
   "author": "Ben Borla (https://github.com/benborla)",
