@@ -29,11 +29,12 @@ services:
       LOG_LEVEL: debug
     restart: always
     entrypoint: npm exec mcp-proxy
-    command: npm exec @oleander/mcp-server-mariadb
+    command: node /app/dist/index.js
     ports:
       - "8080:8080"
     volumes:
       - ./node_modules:/app/node_modules:ro
+      - ./dist:/app/dist
     working_dir: /app
     depends_on:
       mariadb:
