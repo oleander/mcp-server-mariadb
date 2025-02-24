@@ -28,14 +28,9 @@ services:
       MARIADB_DB: test_db
       LOG_LEVEL: debug
     restart: always
-    entrypoint: npm exec mcp-proxy
-    command: node /app/dist/index.js
+    command: ["node", "dist/index.js"]
     ports:
       - "8080:8080"
-    volumes:
-      - ./node_modules:/app/node_modules:ro
-      - ./dist:/app/dist
-    working_dir: /app
     depends_on:
       mariadb:
         condition: service_healthy
