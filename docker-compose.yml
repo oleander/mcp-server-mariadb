@@ -12,7 +12,7 @@ services:
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: mysqladmin ping -uroot -p${MARIADB_ROOT_PASSWORD}
+      test: mysqladmin ping -utest_user -ptest_password
       interval: 10s
       timeout: 5s
       retries: 3
@@ -32,6 +32,9 @@ services:
     command: npm exec @oleander/mcp-server-mariadb
     ports:
       - "8080:8080"
+    volumes:
+      - ./node_modules:/app/node_modules
+    working_dir: /app
     depends_on:
       mariadb:
         condition: service_healthy

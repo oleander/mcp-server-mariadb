@@ -33,8 +33,8 @@ COPY --from=builder /app/package-lock.json /app/package-lock.json
 ENV MARIADB_HOST=127.0.0.1
 ENV MARIADB_PORT=3306
 ENV MARIADB_USER=root
-ENV MARIADB_PASS=
-ENV MARIADB_DB=db_name
+ENV MARIADB_PASS=test_password
+ENV MARIADB_DB=test_db
 ENV LOG_LEVEL=info
 
 # Install production dependencies only
