@@ -2,28 +2,23 @@ version: "3.8"
 
 services:
   mariadb:
-    image: mariadb:latest
+    image: mariadb:10.6
+    container_name: mariadb
     environment:
       MARIADB_ROOT_PASSWORD: example
       MARIADB_DATABASE: test_db
       MARIADB_USER: test_user
       MARIADB_PASSWORD: test_password
-    command: >
-      sh -c "
-      echo 'CREATE TABLE IF NOT EXISTS test_table (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );' > /docker-entrypoint-initdb.d/init.sql
-      && docker-entrypoint.sh mysqld
-      "
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: mysqladmin ping -uroot -p${MARIADB_ROOT_PASSWORD}
       interval: 10s
       timeout: 5s
       retries: 3
 
   mcp-server:
+    container_name: mcp-server
     image: node:23
     environment:
       MARIADB_HOST: mariadb
@@ -32,13 +27,16 @@ services:
       MARIADB_PASS: test_password
       MARIADB_DB: test_db
       LOG_LEVEL: debug
+    restart: always
+    entrypoint: npm exec mcp-proxy
+    command: npm exec @oleander/mcp-server-mariadb
     ports:
       - "8080:8080"
     depends_on:
       mariadb:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8080/ping"]
+      test: curl -sf localhost:8080/ping
       interval: 10s
       timeout: 5s
       retries: 3
