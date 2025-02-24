@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "build": "docker-compose build",
+    "build": "docker-compose build --no-cache",
     "test": "docker-compose up --wait-timeout 60 --exit-code-from tester",
     "launch": "docker-compose up mcp-server -d --wait --wait-timeout 60"
   }
