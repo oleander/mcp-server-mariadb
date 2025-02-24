@@ -33,7 +33,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./node_modules:/app/node_modules
+      - ./node_modules:/app/node_modules:ro
     working_dir: /app
     depends_on:
       mariadb:
