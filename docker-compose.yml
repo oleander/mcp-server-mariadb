@@ -27,7 +27,6 @@ services:
       MARIADB_PASS: test_password
       MARIADB_DB: test_db
       LOG_LEVEL: debug
-    restart: always
     entrypoint: npm exec mcp-proxy
     command: node /app/dist/index.js
     ports:
@@ -49,4 +48,3 @@ services:
     depends_on:
       mcp-server:
         condition: service_healthy
-

@@ -11,6 +11,7 @@ import {
 import * as mariadb from "mariadb";
 import { Pool, PoolConnection } from "mariadb";
 import winston from "winston";
+import CircuitBreaker from "opossum";
 
 interface TableRow {
   table_name: string;
@@ -271,7 +272,33 @@ process.on("SIGTERM", async () => {
   }
 });
 
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
 runServer().catch((error: unknown) => {
   logger.error("Server error:", error);
   process.exit(1);
 });
+
+const circuitBreakerOptions = {
+  timeout: 10000, // 10 seconds
+  errorThresholdPercentage: 50,
+  resetTimeout: 30000, // 30 seconds
+};
+
+const circuitBreaker = new CircuitBreaker(executeQuery, circuitBreakerOptions);
+
+circuitBreaker.on('open', () => logger.warn('Circuit breaker opened'));
+circuitBreaker.on('halfOpen', () => logger.info('Circuit breaker half-open'));
+circuitBreaker.on('close', () => logger.info('Circuit breaker closed'));
+
+async function executeWithCircuitBreaker<T>(sql: string, params: any[] = []): Promise<T> {
+  return circuitBreaker.fire(sql, params);
+}
