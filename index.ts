@@ -10,6 +10,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import * as mariadb from 'mariadb';
 import { Pool, PoolConnection } from 'mariadb';
+import winston from 'winston';
 
 interface TableRow {
   table_name: string;
@@ -38,6 +39,19 @@ const config = {
   },
 };
 
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.printf(({ timestamp, level, message }) => {
+      return `${timestamp} [${level}]: ${message}`;
+    })
+  ),
+  transports: [
+    new winston.transports.Console(),
+  ],
+});
+
 const mariadbQuery = <T>(
   connection: PoolConnection,
   sql: string,
@@ -51,14 +65,22 @@ const mariadbQuery = <T>(
 };
 
 const mariadbGetConnection = (pool: Pool): Promise<PoolConnection> => {
+  logger.info('Attempting to get a database connection');
   return new Promise((resolve, reject) => {
     pool.getConnection()
-      .then((connection: PoolConnection) => resolve(connection))
-      .catch((error: Error) => reject(error));
+      .then((connection: PoolConnection) => {
+        logger.info('Database connection established');
+        resolve(connection);
+      })
+      .catch((error: Error) => {
+        logger.error('Error getting database connection:', error);
+        reject(error);
+      });
   });
 };
 
 const mariadbBeginTransaction = (connection: PoolConnection): Promise<void> => {
+  logger.info('Beginning transaction');
   return new Promise((resolve, reject) => {
     connection.beginTransaction()
       .then(() => resolve())
@@ -67,6 +89,7 @@ const mariadbBeginTransaction = (connection: PoolConnection): Promise<void> => {
 };
 
 const mariadbRollback = (connection: PoolConnection): Promise<void> => {
+  logger.info('Rolling back transaction');
   return new Promise((resolve, _) => {
     connection.rollback()
       .then(() => resolve())
@@ -133,7 +156,7 @@ async function executeReadOnlyQuery<T>(sql: string): Promise<T> {
       // Always reset to read-write mode before releasing the connection
       await mariadbQuery(connection, "SET SESSION TRANSACTION READ WRITE");
     } catch (resetError) {
-      console.error("Error resetting transaction mode:", resetError);
+      logger.error("Error resetting transaction mode:", resetError);
     }
     connection.release();
   }
@@ -209,17 +232,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 // Server startup and shutdown
 async function runServer() {
+  logger.info('Server is starting up');
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  logger.info('Server has started');
 }
 
 const shutdown = async (signal: string) => {
-  console.log(`Received ${signal}. Shutting down...`);
+  logger.info(`Received ${signal}. Shutting down...`);
   return new Promise<void>((resolve, reject) => {
     pool.end()
       .then(() => resolve())
       .catch((err: Error) => {
-        console.error("Error closing pool:", err);
+        logger.error("Error closing pool:", err);
         reject(err);
       });
   });
@@ -244,6 +269,6 @@ process.on("SIGTERM", async () => {
 });
 
 runServer().catch((error: unknown) => {
-  console.error("Server error:", error);
+  logger.error("Server error:", error);
   process.exit(1);
 });

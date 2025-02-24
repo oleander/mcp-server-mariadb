@@ -35,6 +35,7 @@ ENV MARIADB_PORT=3306
 ENV MARIADB_USER=root
 ENV MARIADB_PASS=
 ENV MARIADB_DB=db_name
+ENV LOG_LEVEL=info
 
 # Install production dependencies only
 RUN npm ci --omit=dev
