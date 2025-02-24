@@ -11,6 +11,7 @@ import {
 import * as mariadb from "mariadb";
 import { Pool, PoolConnection } from "mariadb";
 import winston from "winston";
+import CircuitBreaker from "opossum";
 
 interface TableRow {
   table_name: string;
@@ -271,7 +272,68 @@ process.on("SIGTERM", async () => {
   }
 });
 
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
 runServer().catch((error: unknown) => {
   logger.error("Server error:", error);
   process.exit(1);
 });
+
+const circuitBreakerOptions = {
+  timeout: 10000, // 10 seconds
+  errorThresholdPercentage: 50,
+  resetTimeout: 30000, // 30 seconds
+};
+
+const circuitBreaker = new CircuitBreaker(executeQuery, circuitBreakerOptions);
+
+circuitBreaker.on('open', () => logger.warn('Circuit breaker opened'));
+circuitBreaker.on('halfOpen', () => logger.info('Circuit breaker half-open'));
+circuitBreaker.on('close', () => logger.info('Circuit breaker closed'));
+
+async function executeWithCircuitBreaker<T>(sql: string, params: any[] = []): Promise<T> {
+  const result = await circuitBreaker.fire(sql, params);
+  return result as T;
+}
+
+// Add logic to handle exit codes and restart the server accordingly
+process.on('exit', (code) => {
+  if (code === 0) {
+    logger.info('Server exited with code 0. Restarting immediately...');
+    runServer().catch((error: unknown) => {
+      logger.error("Server error:", error);
+      process.exit(1);
+    });
+  } else {
+    logger.warn(`Server exited with code ${code}. Restarting after a grace period...`);
+    setTimeout(() => {
+      runServer().catch((error: unknown) => {
+        logger.error("Server error:", error);
+        process.exit(1);
+      });
+    }, 10000); // 10 seconds grace period
+  }
+});
+
+// Add logic to check database health and restart server if database goes down
+async function checkDatabaseHealth() {
+  try {
+    const connection = await mariadbGetConnection(pool);
+    await connection.ping();
+    connection.release();
+    logger.info('Database is healthy');
+  } catch (error) {
+    logger.error('Database health check failed. Restarting server...');
+    process.exit(1);
+  }
+}
+
+setInterval(checkDatabaseHealth, 30000); // Check database health every 30 seconds

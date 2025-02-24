@@ -14,6 +14,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    restart: always
 
   mcp-server:
     container_name: mcp-server
@@ -27,7 +28,6 @@ services:
       MARIADB_PASS: test_password
       MARIADB_DB: test_db
       LOG_LEVEL: debug
-    restart: always
     entrypoint: npm exec mcp-proxy
     command: node /app/dist/index.js
     ports:
@@ -40,6 +40,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    restart: on-failure
+    restart_policy:
+      condition: on-failure
+      delay: 10s
 
   tester:
     image: node:23
@@ -49,4 +53,3 @@ services:
     depends_on:
       mcp-server:
         condition: service_healthy
-
