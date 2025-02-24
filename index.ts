@@ -233,6 +233,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   return executeReadOnlyQuery(sql);
 });
 
+// Add a new route to handle the `/healthz` endpoint
+server.setRequestHandler({ type: "object", properties: {} }, async () => {
+  try {
+    const connection = await mariadbGetConnection(pool);
+    await connection.ping();
+    connection.release();
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ status: "ok" }),
+    };
+  } catch (error) {
+    return {
+      statusCode: 503,
+      body: JSON.stringify({ status: "error", message: "Database connection failed" }),
+    };
+  }
+});
+
 // Server startup and shutdown
 async function runServer() {
   logger.info("Server is starting up");
