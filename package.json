@@ -22,7 +22,8 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.0.1",
-    "mariadb": "^3.2.3"
+    "mariadb": "^3.2.3",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

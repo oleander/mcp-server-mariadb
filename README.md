@@ -50,6 +50,40 @@ To use this server with the Claude Desktop app, add the following configuration 
 
 Replace `/db_name` with your database name or leave it blank to retrieve all databases.
 
+## Logging
+
+This server uses the `winston` logging library to provide detailed log output. The log level can be controlled using the `LOG_LEVEL` environment variable. The available log levels are:
+
+- `error`: Logs only error messages
+- `warn`: Logs warnings and error messages
+- `info`: Logs informational messages, warnings, and error messages
+- `debug`: Logs debug messages, informational messages, warnings, and error messages
+
+To set the log level, add the `LOG_LEVEL` environment variable to your configuration. For example:
+
+```json
+{
+  "mcpServers": {
+    "mcp_server_mariadb": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@oleander/mcp-server-mariadb",
+      ],
+      "env": {
+        "MARIADB_HOST": "127.0.0.1",
+        "MARIADB_PORT": "3306",
+        "MARIADB_USER": "root",
+        "MARIADB_PASS": "",
+        "MARIADB_DB": "db_name",
+        "LOG_LEVEL": "debug"
+      }
+
+    }
+  }
+}
+```
+
 ## Troubleshooting
 
 ### Package Installation
