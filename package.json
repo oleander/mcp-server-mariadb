@@ -18,7 +18,8 @@
   "scripts": {
     "prepare": "yarn compile && yarn build",
     "compile": "tsc",
-    "build": "shx chmod +x dist/*.js"
+    "build": "shx chmod +x dist/*.js",
+    "test": "docker-compose up --wait-timeout 60 --exit-code-from tester"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.0.1",
