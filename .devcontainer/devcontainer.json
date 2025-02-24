@@ -1,7 +1,7 @@
 {
   "tasks": {
-    "build": "npm install —development",
+    "build": "npm install",
     "test": "curl http://localhost:8080/ping",
-    "launch": "docker-compose -d —wait up"
+    "launch": "docker-compose up -d --wait"
   }
 }
