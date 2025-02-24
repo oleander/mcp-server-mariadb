@@ -28,7 +28,8 @@ services:
       MARIADB_DB: test_db
       LOG_LEVEL: debug
     restart: always
-    command: ["node", "dist/index.js"]
+    entrypoint: npm exec mcp-proxy
+    command: node /app/dist/index.js
     ports:
       - "8080:8080"
     depends_on:
