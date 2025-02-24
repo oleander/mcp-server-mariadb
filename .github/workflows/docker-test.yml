@@ -1,0 +1,16 @@
+name: Docker Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run tests using docker-compose
+        run: docker compose up --wait-timeout 60 --exit-code-from tester --build

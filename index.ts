@@ -8,9 +8,9 @@ import {
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import * as mariadb from 'mariadb';
-import { Pool, PoolConnection } from 'mariadb';
-import winston from 'winston';
+import * as mariadb from "mariadb";
+import { Pool, PoolConnection } from "mariadb";
+import winston from "winston";
 
 interface TableRow {
   table_name: string;
@@ -40,16 +40,14 @@ const config = {
 };
 
 const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.LOG_LEVEL || "info",
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.printf(({ timestamp, level, message }) => {
       return `${timestamp} [${level}]: ${message}`;
-    })
+    }),
   ),
-  transports: [
-    new winston.transports.Console(),
-  ],
+  transports: [new winston.transports.Console()],
 });
 
 const mariadbQuery = <T>(
@@ -58,40 +56,44 @@ const mariadbQuery = <T>(
   params: any[] = [],
 ): Promise<T> => {
   return new Promise((resolve, reject) => {
-    connection.query(sql, params)
+    connection
+      .query(sql, params)
       .then((results: T) => resolve(results))
       .catch((error: Error) => reject(error));
   });
 };
 
 const mariadbGetConnection = (pool: Pool): Promise<PoolConnection> => {
-  logger.info('Attempting to get a database connection');
+  logger.info("Attempting to get a database connection");
   return new Promise((resolve, reject) => {
-    pool.getConnection()
+    pool
+      .getConnection()
       .then((connection: PoolConnection) => {
-        logger.info('Database connection established');
+        logger.info("Database connection established");
         resolve(connection);
       })
       .catch((error: Error) => {
-        logger.error('Error getting database connection:', error);
+        logger.error("Error getting database connection:", error);
         reject(error);
       });
   });
 };
 
 const mariadbBeginTransaction = (connection: PoolConnection): Promise<void> => {
-  logger.info('Beginning transaction');
+  logger.info("Beginning transaction");
   return new Promise((resolve, reject) => {
-    connection.beginTransaction()
+    connection
+      .beginTransaction()
       .then(() => resolve())
       .catch((error: Error) => reject(error));
   });
 };
 
 const mariadbRollback = (connection: PoolConnection): Promise<void> => {
-  logger.info('Rolling back transaction');
+  logger.info("Rolling back transaction");
   return new Promise((resolve, _) => {
-    connection.rollback()
+    connection
+      .rollback()
       .then(() => resolve())
       .catch(() => resolve());
   });
@@ -133,7 +135,7 @@ async function executeReadOnlyQuery<T>(sql: string): Promise<T> {
 
     // Custom JSON serializer to handle BigInt
     const bigIntSerializer = (key: string, value: any) => {
-      if (typeof value === 'bigint') {
+      if (typeof value === "bigint") {
         return value.toString();
       }
       return value;
@@ -232,16 +234,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 // Server startup and shutdown
 async function runServer() {
-  logger.info('Server is starting up');
+  logger.info("Server is starting up");
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  logger.info('Server has started');
+  logger.info("Server has started");
 }
 
 const shutdown = async (signal: string) => {
   logger.info(`Received ${signal}. Shutting down...`);
   return new Promise<void>((resolve, reject) => {
-    pool.end()
+    pool
+      .end()
       .then(() => resolve())
       .catch((err: Error) => {
         logger.error("Error closing pool:", err);

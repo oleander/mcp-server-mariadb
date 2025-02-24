@@ -1,0 +1,52 @@
+services:
+  mariadb:
+    image: mariadb:10.6
+    container_name: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: example
+      MARIADB_DATABASE: test_db
+      MARIADB_USER: test_user
+      MARIADB_PASSWORD: test_password
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: mysqladmin ping -utest_user -ptest_password
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  mcp-server:
+    container_name: mcp-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      MARIADB_HOST: mariadb
+      MARIADB_PORT: 3306
+      MARIADB_USER: test_user
+      MARIADB_PASS: test_password
+      MARIADB_DB: test_db
+      LOG_LEVEL: debug
+    restart: always
+    entrypoint: npm exec mcp-proxy
+    command: node /app/dist/index.js
+    ports:
+      - "8080:8080"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    healthcheck:
+      test: curl -sf localhost:8080/ping
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  tester:
+    image: node:23
+    container_name: tester
+    command: curl mcp-server:8080/ping
+    restart: no
+    depends_on:
+      mcp-server:
+        condition: service_healthy
+
