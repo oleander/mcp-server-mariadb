@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "prepare": "yarn run tsc && npm run build",
-    "build": "yarn shx chmod +x dist/*.js"
+    "build": "yarn run shx chmod +x dist/*.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.0.1",
