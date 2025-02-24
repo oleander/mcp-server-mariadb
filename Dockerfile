@@ -2,7 +2,7 @@
 FROM node:23-alpine AS builder
 
 # Add build dependencies
-RUN apk add --no-cache python3 make curl  g++
+RUN apk add --no-cache python3 make  g++
 
 WORKDIR /app
 
@@ -20,6 +20,7 @@ RUN yarn build
 
 # Production stage
 FROM node:23-alpine
+RUN apk add --no-cache curl
 
 # Add security: run as non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
