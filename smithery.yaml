@@ -25,7 +25,8 @@ startCommand:
         description: The password for the specified MariaDB user.
       mariadbDb:
         type: string
-        description: The database name to connect to. If left blank, retrieves all
+        description:
+          The database name to connect to. If left blank, retrieves all
           databases.
   commandFunction:
     # A function that produces the CLI command to start the MCP on stdio.

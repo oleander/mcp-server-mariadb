@@ -15,10 +15,6 @@
     "stripInternal": true,
     "newLine": "lf"
   },
-  "include": [
-    "./*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["./*.ts"],
+  "exclude": ["node_modules"]
 }
