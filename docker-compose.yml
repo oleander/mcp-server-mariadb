@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   mariadb:
     image: mariadb:10.6
@@ -44,3 +42,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+
+  tester:
+    image: node:23
+    container_name: tester
+    command: curl mcp-server:8080/ping
+    restart: no
+    depends_on:
+      mcp-server:
+        condition: service_healthy
+

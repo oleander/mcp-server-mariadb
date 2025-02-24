@@ -1,7 +1,7 @@
 {
   "tasks": {
-    "build": "npm install",
-    "test": "curl http://localhost:8080/ping",
-    "launch": "docker-compose up -d --wait"
+    "build": "docker-compose build",
+    "test": "docker-compose up --wait-timeout 60 --exit-code-from tester",
+    "launch": "docker-compose up mcp-server -d --wait --wait-timeout 60"
   }
 }
