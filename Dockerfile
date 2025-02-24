@@ -15,8 +15,8 @@ RUN --mount=type=cache,target=/root/.npm npm install --ignore-scripts
 # Copy the rest of the application code
 COPY . /app
 
-# Build the application
-RUN npm run build
+# Build and distribute the application
+RUN npm install && npm run build
 
 # Use a new, clean image for the release
 FROM node:22-alpine
@@ -44,4 +44,4 @@ RUN npm ci --omit=dev
 # EXPOSE 8080
 
 # Run the server
-ENTRYPOINT ["node", "dist/index.js"]
+ENTRYPOINT ["npm", "exec", "mcp-server-mariadb"]
