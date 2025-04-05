@@ -47,7 +47,7 @@ const logger = winston.createLogger({
       return `${timestamp} [${level}]: ${message}`;
     }),
   ),
-  transports: [new winston.transports.Console()],
+  transports: [new winston.transports.Console({ stderrLevels: ['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly'] })],
 });
 
 const mariadbQuery = <T>(
